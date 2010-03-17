@@ -19,43 +19,9 @@ from waveapi import element
 from waveapi import robot
 from waveapi import appengine_robot_runner
 
-#import waveapi.document as doc
-#import re
-
-import ChemSpiPy
+from ChemSpideyUtil import *
 
 CHEM_KEY = "ChemSpidey.appspot.com/todo"
-
-def chemify(text):
-  """Accepts a text string and returns dictionary of information and annotations
-
-  Text string is parsed and sent to chemspider to return chemspider ID, image url,
-  and molecular weight information that makes it feasible to convert weight to
-  moles and similar. Returns a dictionary that contains at a minimum the keys 
-  'replacementtext', 'imageurl', and 'annotations' which is a tuple of dictionaries 
-  containing the keys 'text', 'annotation', 'value', 'offset', 'length' for each
-  of the annotations required"""
-
-  test = {'replacementtext':'chemchemchem',
-          'imageurl'       :'http://www.chemspider.com/ImagesHandler.ashx?id=236',
-          'annotations'    :[{'text'      :'chem',
-                              'annotation':'link/manual',
-                              'value'     :'http://www.chemspider.com',
-                              'offset'    :4,
-                              'length'    :4},
-                             {'text'      :'chem',
-                              'annotation':'chemspidey.appspot.com/csid',
-                              'value'     :'666',
-                              'offset'    :8,
-                              'length'    :4}
-                             ]
-          }
-
-   
-  return test
-
-
-
 
 def OnAnnotationChanged(event, wavelet):
   """Identify annotations that match CHEM_KEY and return modified text and anntns
