@@ -1,0 +1,15 @@
+application: chemspidey
+version: 2
+runtime: python
+api_version: 1
+
+handlers:
+
+- url: /_wave/.*
+  script: ChemSpidey.py
+
+- url: /gadgets
+  static_dir: gadgets
+
+- url: /extensions
+  static_dir: extensions

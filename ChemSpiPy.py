@@ -1,5 +1,5 @@
 import urllib
-from xml.etree import ElementTree as ET
+from xml.etree import cElementTree as ET
 import unittest
 
 
@@ -19,7 +19,6 @@ class ChemSpiderId(str):
         self.id = ''
         self.image = ''
         self.molwt = ''
-        self.mol = ''
 
         if type(csid) == str and csid.isdigit() == True:
             self.id = csid
@@ -67,35 +66,19 @@ class ChemSpiderId(str):
             response = urllib.urlopen(searchurl)
 
             tree = ET.parse(response) #parse the CS XML response
-            molwttag = tree.find('{http://www.chemspider.com/}MolecularWeight')
-            molecularweight = float(molwttag.text)
+            elem = tree.getroot()
+            csmolwt_tags = elem.getiterator('{http://www.chemspider.com/}MolecularWeight')
 
+            molwtlist = []
+            for tags in csmolwt_tags:
+                molwtlist.append(tags.text)
+
+            molecularweight = float(molwtlist[0])
             self.molwt = molecularweight
             return molecularweight
 
-    def getMolFile(self):
-        """Poll the ChemSpider MS API for the mol descriptor for a specific Chemspider ID."""
 
-        assert self != '', 'ChemSpiderID not initialised with value'
-
-        #if self.molfile == None:
-        baseurl = 'http://www.chemspider.com/'
-        token  = '3a19d00d-874f-4879-adc0-3013dbecbbc9'
-
-            # Construct a search URL and poll Chemspider for the XML result
-        searchurl = baseurl + 'MassSpecAPI.asmx/GetRecordMol?csid=' + self.id + '&calc3d=true&token=' + token
-
-        response = urllib.urlopen(searchurl)
-        
-        tree = ET.parse(response) #Parse the CS XML response
-        moltag = tree.getroot()
-        molfiletext = moltag.text
-
-        self.molfile = molfiletext
-        return molfiletext 
-
-        #else:
-         #   return self.molfile
+            
 
 
 def simplesearch(query):
@@ -142,24 +125,6 @@ class TestChemSpiPy(unittest.TestCase):
         self.testquery = 'benzene'
         self.testimageurl = 'http://www.chemspider.com/ImagesHandler.ashx?id=236'
         self.testmolwt = 78.1118
-        self.testmol = """241
-  -OEChem-10200920453D
-
-  6  6  0     0  0  0  0  0  0999 V2000
-   -0.7040   -1.2194   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.7040   -1.2194   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -1.4081   -0.0000   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    1.4081    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -0.7040    1.2194    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.7040    1.2194   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-  1  2  2  0  0  0  0
-  1  3  1  0  0  0  0
-  2  4  1  0  0  0  0
-  3  5  2  0  0  0  0
-  4  6  2  0  0  0  0
-  5  6  1  0  0  0  0
-M  END
-"""
  
     def testchemspiderid(self):
         self.assertRaises(TypeError, ChemSpiderId, 1.2)
@@ -167,7 +132,6 @@ M  END
         self.assertEqual(ChemSpiderId(self.testint), self.teststring)
         self.assertEqual(ChemSpiderId(self.teststring).imageurl(), self.testimageurl)
         self.assertEqual(ChemSpiderId(self.teststring).molweight(), self.testmolwt)
-        self.assertEqual(ChemSpiderId(self.teststring).mol, self.testmol)
 
  
     def testsimplesearch(self):

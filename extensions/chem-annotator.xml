@@ -1,0 +1,13 @@
+<extension
+    name="Chem Annotator"
+    thumbnailUrl="http://upload.wikimedia.org/wikipedia/commons/5/5b/The_Chemistry_trophy.JPG"
+    description="Mark up the chemistry in your wave.">
+  <author name="Cameron Neylon"/>
+  <menuHook location="toolbar" text="Chem Annotator"
+      iconUrl="http://www.chemspider.com/ImagesHandler.ashx?id=236">
+    <annotateSelection key="ChemSpidey.appspot.com/todo" value="todo"/>
+    <addParticipants>
+      <participant id="chemspidey@appspot.com"/>
+    </addParticipants>
+  </menuHook>
+</extension>
