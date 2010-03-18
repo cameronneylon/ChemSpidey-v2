@@ -1,6 +1,9 @@
-import urllib
+import urllib2
 from xml.etree import cElementTree as ET
 import unittest
+import cstoken
+
+TOKEN = cstoken.token('a')
 
 
 class ChemSpiderId(str):
@@ -58,12 +61,11 @@ class ChemSpiderId(str):
  
         if self.molwt == '':
             baseurl = 'http://www.chemspider.com/'
-            token  = '3a19d00d-874f-4879-adc0-3013dbecbbc9'
 
             # Construct a search URL and poll Chemspider for the XML result
-            searchurl = baseurl + 'MassSpecAPI.asmx/GetExtendedCompoundInfo?CSID=' + self.id + '&token=' + token
+            searchurl = baseurl + 'MassSpecAPI.asmx/GetExtendedCompoundInfo?CSID=' + self.id + '&token=' + TOKEN
 
-            response = urllib.urlopen(searchurl)
+            response = urllib2.urlopen(searchurl)
 
             tree = ET.parse(response) #parse the CS XML response
             elem = tree.getroot()
@@ -92,12 +94,11 @@ def simplesearch(query):
     assert type(query) == str or type(query) == unicode, 'query not a string object'
 
     baseurl = 'http://www.chemspider.com/'
-    token  = '3a19d00d-874f-4879-adc0-3013dbecbbc9'
 
     # Construct a search URL and poll Chemspider for the XML result
-    searchurl = baseurl + 'Search.asmx/SimpleSearch?query=' + query + '&token=' + token
+    searchurl = baseurl + 'Search.asmx/SimpleSearch?query=' + query + '&token=' + TOKEN
 
-    response = urllib.urlopen(searchurl)
+    response = urllib2.urlopen(searchurl)
 
     tree = ET.parse(response) #parse the CS XML response
     elem = tree.getroot()

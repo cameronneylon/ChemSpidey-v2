@@ -13,6 +13,7 @@ import ChemSpiPy
 import ChemParsing
 import unittest
 import urllib2
+import logging
 
 def chemify(text):
   """Accepts a text string and returns dictionary of information and annotations
@@ -59,18 +60,12 @@ def chemify(text):
 
   try:
       chemspiderID = ChemSpiPy.simplesearch(parsedname)
-      loggin.debug('Success connecting to ChemSpider')
+      logging.debug('Success connecting to ChemSpider')
   except IndexError, ie:
       errorstring = "Sorry I can't find %s in ChemSpider - try a different name?" % parsedname
       chemified['replacementtext'] = errorstring
       chemified['error'] = 'IndexError'
       logging.debug('Failed to find a match in simplesearch')
-      return chemified
-  except urllib2.DownloadError, de:
-      logging.debug('No connection to ChemSpider?')
-      errorstring = "Sorry I can't seem to reach ChemSpider at the moment. Try again later?"
-      chemified['replacementtext'] = errorstring
-      chemified['error'] = 'DownloadError'
       return chemified
 
   chemified['csid'] = chemspiderID
@@ -86,13 +81,13 @@ def chemify(text):
       if quantityunits == 'mg':
           nanomoles = 1000*float(quantity)/chemspiderID.molweight()
           nanomoles = round(nanomoles, 2)
-          chemified['moles'] = nanomoles
+          chemified['moles'] = str(nanomoles)
           chemified['molesunits'] = 'nmol'
 
       elif quantityunits == 'g':
-          millimoles = 1000*quantity/chemspiderID.molweight()
+          millimoles = 1000*float(quantity)/chemspiderID.molweight()
           millimoles = round(millimoles, 2)
-          chemified['moles'] = nanomoles
+          chemified['moles'] = str(millimoles)
           chemified['molesunits'] = 'mmol'
 
       quantitystring = (' ' + quantity + ' ' + quantityunits + ', '
