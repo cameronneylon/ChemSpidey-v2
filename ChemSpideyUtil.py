@@ -12,6 +12,7 @@
 import ChemSpiPy
 import ChemParsing
 import unittest
+import urllib2
 
 def chemify(text):
   """Accepts a text string and returns dictionary of information and annotations
@@ -46,16 +47,32 @@ def chemify(text):
                }
 
   # Parse the text using chemparse which returns a dictionary
-  parsed = chemparse(text)
+  parsed = ChemParsing.chemparse(text)
 
   # Create local variables for the relevant returned information  
-  parsedname = parsed.results.chemicalname
-  quantity = float(parsed.results.amount)
-  quantityunits = parsed.results.units
-  role = parsed.results.role
+  parsedname = parsed.get('name', None)
+  quantity = parsed.get('amount', None)
+  quantityunits = parsed.get('units', None)
+  role = parsed.get('role', None)
 
   # Obtain chemspider ID and other information via ChemSpider simple search
-  chemspiderID = simplesearch(parsedname)
+
+  try:
+      chemspiderID = ChemSpiPy.simplesearch(parsedname)
+      loggin.debug('Success connecting to ChemSpider')
+  except IndexError, ie:
+      errorstring = "Sorry I can't find %s in ChemSpider - try a different name?" % parsedname
+      chemified['replacementtext'] = errorstring
+      chemified['error'] = 'IndexError'
+      logging.debug('Failed to find a match in simplesearch')
+      return chemified
+  except urllib2.DownloadError, de:
+      logging.debug('No connection to ChemSpider?')
+      errorstring = "Sorry I can't seem to reach ChemSpider at the moment. Try again later?"
+      chemified['replacementtext'] = errorstring
+      chemified['error'] = 'DownloadError'
+      return chemified
+
   chemified['csid'] = chemspiderID
   chemified['imageurl'] = chemspiderID.imageurl()
 
@@ -64,10 +81,10 @@ def chemify(text):
 
   # Check if an amount has been returned, and if it a weight attempt to calculate moles
   quantitystring = ''
-  if quantity != '' and units.find('g') != -1:
+  if quantity != '' and quantityunits.find('g') != -1:
 
       if quantityunits == 'mg':
-          nanomoles = 1000*quantity/chemspiderID.molweight()
+          nanomoles = 1000*float(quantity)/chemspiderID.molweight()
           nanomoles = round(nanomoles, 2)
           chemified['moles'] = nanomoles
           chemified['molesunits'] = 'nmol'
@@ -83,8 +100,11 @@ def chemify(text):
 
   # Set up the string to be returned back to the Wave robot
   texttoreturn = parsedname + ' (csid:' + chemspiderID + quantitystring + ')'
+  chemified['replacementtext'] = texttoreturn
+
+  # Set up the annotations to be returned
   chemified['annotations'].append({'text'       : texttoreturn,
-                                   'annotation' : chemspidey.appspot.com/role,
+                                   'annotation' : 'chemspidey.appspot.com/role',
                                    'value'      : role,
                                    'offset'     : 0,
                                    'length'     : len(texttoreturn)})
@@ -99,18 +119,20 @@ def chemify(text):
   return chemified
 
 
+# some tests
 
+if __name__ == '__main__':
+    tests = [ "benzene", 
+          "glucose 5g", 
+          "acetone 5 ml", 
+          "benzene solvent image", 
+          "glucose 5g startingmaterial", 
+          "2-5-dithioglucose 7.34mg product"]
 
-
-
-
-
-
-
-
-
-
-
-
+    for t in tests:
+        try:
+            print t, chemify(t)
+        except TypeError, te:
+            print 'te'
 
 

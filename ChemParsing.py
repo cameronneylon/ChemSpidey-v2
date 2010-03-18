@@ -11,11 +11,10 @@ quantity = amount + units
 
 chemstring = chemicalname + (Optional(quantity) & Optional(role))
 
-
 def chemparse(text):
     """Accept a text string and parse, return the results as a dictionary"""
 
-    results = text.parseString(text)
+    results = chemstring.parseString(text)
     dict = {'name'  : results.chemicalname,
             'amount': results.amount,
             'units' : results.units,
@@ -26,9 +25,8 @@ def chemparse(text):
     
 
 # some hacked together tests
-if __name__ = '__main__':
-
-tests = [ "benzene", 
+if __name__ == '__main__':
+  tests = [ "benzene", 
           "glucose 5g", 
           "acetone 5 ml", 
           "benzene solvent image", 
