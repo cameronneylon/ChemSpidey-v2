@@ -51,6 +51,11 @@ def OnAnnotationChanged(event, wavelet):
     payload = text[start:end]
     chemistry = chemify(payload)
 
+    if 'error' in chemistry:
+        blip.append('\n\nError:' + chemistry['replacementtext'])
+        blip.range(start, end).clear_annotation(CHEM_KEY)
+        return
+
     # if there is an image url in returned dictionary requested then 
     # replace with image
     if chemistry:
